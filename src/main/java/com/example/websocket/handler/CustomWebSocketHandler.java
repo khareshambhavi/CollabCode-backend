@@ -22,9 +22,9 @@ import com.example.websocket.Actions;
 public class CustomWebSocketHandler extends TextWebSocketHandler {
 
     private static final ObjectMapper objectMapper = new ObjectMapper();
-    private static final Map<String, String> userSocketMap = new HashMap<>();
-    private static final Map<String, Set<WebSocketSession>> roomSessionsMap = new HashMap<>();
-    private static final Map<String, String> roomCodeMap = new HashMap<>();
+    private static final Map<String, String> userSocketMap = new HashMap<>();//Stores WebSocket ID → username mapping.
+    private static final Map<String, Set<WebSocketSession>> roomSessionsMap = new HashMap<>();//Stores room ID → list of users (WebSocket sessions).
+    private static final Map<String, String> roomCodeMap = new HashMap<>();//Stores room ID → current code (so new users get the latest code).
 
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
@@ -121,10 +121,12 @@ public class CustomWebSocketHandler extends TextWebSocketHandler {
         // Finding the session with the given socketId and sending the code change message
         for (WebSocketSession client : roomSessionsMap.values().stream().flatMap(Set::stream).collect(Collectors.toSet())) {
             if (client.getId().equals(socketId)) {
-                client.sendMessage(new TextMessage(objectMapper.writeValueAsString(Map.of(
+                synchronized (client) {
+                    client.sendMessage(new TextMessage(objectMapper.writeValueAsString(Map.of(
                         "type", Actions.CODE_CHANGE,
                         "code", code
-                ))));
+                    ))));
+                }
                 break;
             }
         }
