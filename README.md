@@ -46,7 +46,7 @@ CollabCode is a real-time code editor that allows multiple users to join a share
    ```bash
    mvn spring-boot:run
    ```
-   The server will start on http://localhost:8080.
+   The server will start on http://localhost:5000.
 
 ## WebSocket Endpoints
 The backend exposes WebSocket endpoints for real-time communication. Clients connect to these endpoints to join rooms, send code changes, and receive updates.
